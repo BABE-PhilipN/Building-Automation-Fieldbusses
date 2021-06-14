@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="P_Tc3DALI_KL6821" Id="{d30978f9-ad53-4dd9-b9c1-4a9739b5db2d}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_Tc3DALI_KL6821
+VAR
+	KL6821_Inputs 	AT %I*			: ST_KL6821InData;
+	KL6821_Outputs 	AT %Q*			: ST_KL6821OutData;
+                                	
+	fbKL6821Communication			: FB_KL6821Communication;
+	
+	fbDALI102DirectArcPowerControl	: FB_DALI102DirectArcPowerControl(fbKL6821Communication);
+	// the communication link between the command FB's and the communication FB is generated via the initialisation
+	// of each command FB (see declaration line above between the brackets)
+	// Since this is done at the initialisation fase, an online change will not modify this.
+	// If this link has to be modified, the PLc has to be rebooted after download of an FB_Init/FB_ReInit has to be performed
+	// https://infosys.beckhoff.com/content/1033/tc3_plc_intro/54043200573202955.html?id=5512665277084168696
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Communication and configuration block
+// =====================================
+fbKL6821Communication(
+	bError						=> , 
+	ipResultMessage				=> , 
+	bResetMaximumDemandCounter	:= , 
+	bResetOverflowCounter		:= , 
+	nOptions					:= , 
+	bBusy						=> , 
+	aBufferDemandMeter			=> , 
+	aBufferMaximumDemandMeter	=> , 
+	aBufferOverflowCounter		=> , 
+	bResetInactiveProcessImage	:= , 
+	bInitialise					:= , 
+	eCommandKBusWatchdog		:= E_DALIConfigurationCommand.RecallMaxLevel, 
+	eCommandDI1RisingEdge		:= E_DALIConfigurationCommand.RecallMaxLevel, 
+	eCommandDI1FallingEdge		:= E_DALIConfigurationCommand.DoNothing, 
+	eCommandDI2RisingEdge		:= E_DALIConfigurationCommand.Off, 
+	eCommandDI2FallingEdge		:= E_DALIConfigurationCommand.DoNothing, 
+	ePowerSupplyMode			:= E_DALIPowerSupplyMode.On, 
+	bDigitalInput1Active		=> , 
+	bDigitalInput2Active		=> , 
+	bProcessImageInactive		=> , 
+	bCollisionError				=> , 
+	bPowerSupplyError			=> , 
+	bShortCircuit				=> , 
+	bInitialising				=> , 
+	nTerminalDescription		=> , 
+	nFirmwareVersion			=> , 
+	stInData					:= KL6821_Inputs, 
+	stOutData					:= KL6821_Outputs);
+	
+// Control light with short address 10 to level 127 with middle priority
+// =====================================================================
+fbDALI102DirectArcPowerControl(
+	bError						=> , 
+	ipResultMessage				=> , 
+	bStart						:= ,  			// A rising edge will trigger setting DALI address 10 to power level 127
+	nAddress					:= 10, 
+	eAddressType				:= E_DALIAddressType.Short, 
+	eCommandPriority			:= E_DALICommandPriority.Middle, 
+	bBusy						=> , 
+	nArcPowerLevel				:= 127);]]></ST>
+    </Implementation>
+    <LineIds Name="P_Tc3DALI_KL6821">
+      <LineId Id="50" Count="1" />
+      <LineId Id="7" Count="11" />
+      <LineId Id="44" Count="5" />
+      <LineId Id="25" Count="9" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="57" Count="7" />
+      <LineId Id="55" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

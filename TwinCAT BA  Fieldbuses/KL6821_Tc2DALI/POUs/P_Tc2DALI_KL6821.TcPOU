@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="P_Tc2DALI_KL6821" Id="{e0f2dcdd-04c8-477c-809d-b004e7c229e3}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_Tc2DALI_KL6821
+VAR
+	KL6821_Inputs 	AT %I*		: ST_KL6821InData;
+	KL6821_Outputs 	AT %Q*		: ST_KL6821OutData;
+
+	fbKL6821Config				: FB_KL6821Config;
+	fbKL6821Communication		: FB_KL6821Communication;
+
+	stKL6821_Inputs				: ST_KL6821InData;
+	stKL6821_Outputs			: ST_KL6821OutData;
+
+	stCommandBuffer				: ST_DALIV2CommandBuffer;
+	// This command buffer is used as a communication channel between the command FB's and the communication FB
+
+	fb_PowerControl				: FB_DALIV2DirectArcPowerControl;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Configuration block
+// ===================
+fbKL6821Config(
+	bConfigurate				:= TRUE, 
+	eCommandKBusWatchdog		:= E_DALIV2ConfigurationCommands.eDALIV2CommandRecallMinLevel, 
+	eCommandDI1RisingEdge		:= E_DALIV2ConfigurationCommands.eDALIV2CommandRecallMaxLevel, 
+	eCommandDI1FallingEdge		:= E_DALIV2ConfigurationCommands.eDALIV2CommandDoNothing, 
+	eCommandDI2RisingEdge		:= E_DALIV2ConfigurationCommands.eDALIV2CommandOff, 
+	eCommandDI2FallingEdge		:= E_DALIV2ConfigurationCommands.eDALIV2CommandDoNothing, 
+	ePowerSupplyMode			:= E_DALIV2PowerSupplyMode.eDALIV2PowerSupplyModeOn, 
+	nOptions					:= , 
+	bBusy						=> , 
+	bError						=> , 
+	nErrorId					=> , 
+	nTerminalDescription		=> , 
+	nFirmwareVersion			=> , 
+	sDescription				=> , 
+	stInDataTerminal			:= KL6821_Inputs, 
+	stOutDataTerminal			:= KL6821_Outputs, 
+	stInData					:= stKL6821_Inputs, 
+	stOutData					:= stKL6821_Outputs);
+
+// Communication block
+// ===================
+fbKL6821Communication(
+	bResetMaximumDemandCounter	:= , 
+	bResetOverflowCounter		:= , 
+	bResetInactiveProcessImage	:= , 
+	nOptions					:= , 
+	bBusy						=> , 
+	bError						=> , 
+	nErrorId					=> , 
+	arrBufferDemandMeter		=> , 
+	arrBufferMaximumDemandMeter	=> , 
+	arrBufferOverflowCounter	=> , 
+	bLineIsBusy					=> , 
+	bLineIsInitialized			=> , 
+	bDigitalInput1Active		=> , 
+	bDigitalInput2Active		=> , 
+	bProcessImageInactive		=> , 
+	bCollisionError				=> , 
+	bPowerSupplyError			=> , 
+	bShortCircuit				=> , 
+	stInData					:= stKL6821_Inputs, 
+	stOutData					:= stKL6821_Outputs, 
+	stCommandBuffer				:= stCommandBuffer);
+	
+// Control light with short address 10 to level 127 with middle priority
+// =====================================================================
+fb_PowerControl(
+	bStart						:= , 			// A rising edge will trigger setting DALI address 10 to power level 127
+	nAddr						:= 10, 
+	eAddrType					:= E_DALIV2AddrType.eDALIV2AddrTypeShort, 
+	eCommandPriority			:= E_DALIV2CommandPriority.eDALIV2CommandPriorityMiddle, 
+	nArcPowerLevel				:= 127, 
+	bBusy						=> , 
+	bError						=> , 
+	nErrorId					=> , 
+	stCommandBuffer				:= stCommandBuffer);
+	
+]]></ST>
+    </Implementation>
+    <LineIds Name="P_Tc2DALI_KL6821">
+      <LineId Id="29" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="32" Count="17" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="8" Count="20" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="59" Count="1" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="63" Count="8" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="73" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

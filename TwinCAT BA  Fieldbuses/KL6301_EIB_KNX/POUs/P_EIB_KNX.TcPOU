@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="P_EIB_KNX" Id="{eeff4ee4-bf8e-4a34-bfb9-745d416214dd}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_EIB_KNX
+VAR
+	fbKL6301			: KL6301;
+	PHYS_ADDR			: EIB_PHYS_ADDR 					:=	(Area := 1, Line := 2, Device := 3);
+	GROUP_FILTER		: ARRAY [1..8] OF EIB_GROUP_FILTER	:=	[
+																	(GROUP_ADDR := (MAIN := 0, SUB_MAIN := 0, NUMBER := 0), GROUP_LEN := 10),
+																	(GROUP_ADDR := (MAIN := 0, SUB_MAIN := 1, NUMBER := 0), GROUP_LEN := 10),
+																	(GROUP_ADDR := (MAIN := 0, SUB_MAIN := 2, NUMBER := 0), GROUP_LEN := 10),
+																	(GROUP_ADDR := (MAIN := 0, SUB_MAIN := 3, NUMBER := 0), GROUP_LEN := 10)
+																];
+	iMode				: INT := 0;
+			(*
+				0 - for firmware B0 and higher - 4 Filter, each with 64 entries
+				1 - for firmware B1 and higher - 8 Filter, each with 32 entries
+				2 - for firmware B3 and higher - 8 Filter, each with 32 entries inverted
+				100 - for firmware B1 and higher - monitor function, all group address telegrams can be received. The telegrams are not acknowledged (no ACK is being sent). At monitor operation transmission is not possible.
+			*)
+
+	stDataRec			: EIB_REC;
+	
+	fbEIB_BIT_REC		: EIB_BIT_REC;
+	
+	fbEIB_BIT_SEND		: EIB_BIT_SEND;
+	fbEIB_BIT_SEND_EX	: EIB_BIT_SEND_EX;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Communication block
+// ===================
+fbKL6301(
+	bActivate			:= TRUE, 
+	idx					:= 1, 
+	EIB_PHYS_ADDR		:= PHYS_ADDR, 
+	EIB_GROUP_FILTER	:= GROUP_FILTER, 
+	iMode				:= iMode, 
+	tTimeout			:= T#500MS, 
+	bActive				=> , 
+	bReady				=> , 
+	bError				=> , 
+	iErrorId			=> , 
+	str_Data_Rec		=> stDataRec, 
+	KL6301_IN			:= GVL_IO.KL6301_Inputs, 
+	KL6301_OUT			:= GVL_IO.KL6301_Outputs);
+	
+	(* Special requirements for this FB "KL6301"
+			* This block may only be called once for each KL6301!
+			* It must be called in the same task as the send and receive blocks!
+			* In the PLC project this block may only be called once per cycle!
+			* A PLC project may contain a maximum of 64 KL6301 terminals! (see idx input)
+	*)
+
+	(*	There is also a KL6301_EX FB variant.
+			This function block has the additional feature to support the "ETS search and blink" functionlaty in BETA test fase
+	*)
+	
+// Receive bit from KNX address 0.0.3
+// ==================================
+	(*
+		This function block receives 1 bit of EIB data on the set group address and converts them into an IEC61131-3 BOOL variable.
+	*)
+fbEIB_BIT_REC(
+	Group_Address		:= F_EIB_GroupAddress(EIB_MAIN:= 0, EIB_SUB_MAIN:= 0, EIB_NUMBER:= 3), 
+	strData_Rec			:= stDataRec, 
+	bDataReceive		=> , 			// This bit is set to FALSE for exactly one cycle when an EIB telegram with the group address is received.
+	bData				=> );			// Valid values (TRUE/FALSE).
+	
+// Send bit to KNX address 20.6.3 when value changes
+// =================================================
+	(*
+			This function block sends a 1-bit EIB value to the set group address. 
+			An IEC61131-3 BOOL variable is available as input value. 
+			The data are only transferred if there is a change in the data value. 
+			If the value changes again within 200 milliseconds, new data are only sent to the EIB device after another 200 millisecond has passed (see diagram). 
+			No new EIB telegram is sent if the value changes within the "min. send time" but falls back to the old, already sent value within the "min. send time".
+	*)
+fbEIB_BIT_SEND(
+	Group_Address		:= F_EIB_GroupAddress(EIB_MAIN:= 20, EIB_SUB_MAIN:= 6, EIB_NUMBER:= 3), 
+	bData				:= , 			// Range of values TRUE/FALSE.
+	str_Rec				:= stDataRec, 
+	bError				=> , 
+	iErrorID			=> );
+	
+
+// Send bit to KNX address 20.7.5 with additional communication possibilities
+// ==========================================================================
+	(*
+			This function block sends a Bool value to the set group address. The data can be sent in Manual, Polling or OnChange mode (iMode).
+
+			Additional parameters:
+			----------------------			
+				bStart: 
+					Activates the function block. The function block starts operating depending on the set mode (see iMode).
+	
+				iMode:
+					0 - With a positive edge at bStart, an EIB telegram is sent. bBusy becomes FALSE again when the command has been processed.
+					1 - Polling Mode: If bStart is TRUE is, EIB telegrams are sent at intervals of CyclePolling.
+					2 - OnChange Mode: If bStart is TRUE, an EIB telegram is sent automatically when the data changes. MinSendTime can be used to parameterize the minimum interval between two EIB messages, in order to avoid excessive EIB network load.
+				
+				CyclePolling: 
+					Polling time for iMode = 1 (polling mode). The minimum time is 200 ms.
+				
+				MinSendTime: 
+					Minimum interval time, which has to elapse before a telegram is sent in OnChange mode. The minimum time is 200 ms.
+				
+				bEnableReadReq: 
+					Enables the answer of read commands from other KNX devices
+					
+	*)
+fbEIB_BIT_SEND_EX(
+	bStart				:= , 
+	iMode				:= , 
+	CyclePolling		:= , 
+	MinSendTime			:= , 
+	Group_Address		:= F_EIB_GroupAddress(EIB_MAIN:= 0, EIB_SUB_MAIN:= 7, EIB_NUMBER:= 5), 
+	bData				:= , 
+	str_Rec				:= stDataRec, 
+	bEnableReadReq		:= , 
+	bBusy				=> , 
+	bError				=> , 
+	iErrorID			=> );]]></ST>
+    </Implementation>
+    <LineIds Name="P_EIB_KNX">
+      <LineId Id="41" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="18" Count="12" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="89" Count="1" />
+      <LineId Id="94" Count="2" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="211" Count="1" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="77" Count="2" />
+      <LineId Id="36" Count="4" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="73" Count="3" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="64" Count="4" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="155" Count="2" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="167" Count="6" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="175" Count="1" />
+      <LineId Id="182" Count="1" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="144" Count="10" />
+      <LineId Id="124" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

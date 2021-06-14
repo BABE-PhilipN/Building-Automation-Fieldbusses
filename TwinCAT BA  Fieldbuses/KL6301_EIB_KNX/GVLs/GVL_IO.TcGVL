@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <GVL Name="GVL_IO" Id="{d9bc908b-ae04-4aeb-86da-e1036c905671}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	KL6301_Inputs 		AT %I*	: ARRAY [1..24] OF BYTE;
+	KL6301_Outputs 		AT %Q*	: ARRAY [1..24] OF BYTE;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

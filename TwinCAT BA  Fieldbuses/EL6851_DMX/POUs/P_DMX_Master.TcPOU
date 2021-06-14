@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="P_DMX_Master" Id="{47a1602b-1c2d-4ffb-b6fc-ae46a8cff48e}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_DMX_Master
+VAR
+	(*	As a default only the output channels 1-512 are activated in the process image of the DMX Master terminal (EL6851)
+		this can be modified in the tab "Process Data" of the terminal:
+			* if less channels are wanted,
+			* if RDM communication is wanted, the input channels also have to be enabled and linked.
+	*)
+	DMX_Master_In		AT %I*	: ST_EL6851InDataEx;	
+	DMX_Master_Out		AT %Q*	: ST_EL6851OutData;	
+
+	fbCommunication				: FB_EL6851CommunicationEx;
+	stCommandBuffer				: ST_DMXCommandBuffer;
+	arrProcessData				: ARRAY [1..512] OF BYTE;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Communication
+// =============
+fbCommunication(
+	wSourceManufacturerId		:= 16#42_41, 
+	dwSourceDeviceId			:= 16#12_13_14_15, 
+	bEnableSendingData			:= TRUE, 
+	bSetCycleMode				:= TRUE, 
+	bSendDefaultData			:= FALSE, 
+	uiDataLength				:= 512, 
+	dwOptions					:= , 
+	bError						=> , 
+	udiErrorId					=> , 
+	bCycleMode					=> , 
+	byBufferDemandMeter			=> , 
+	byBufferMaximumDemandMeter	=> , 
+	uiBufferOverflowCounter		=> , 
+	bLineIsBusy					=> , 
+	stEL6851InData				:= DMX_Master_In, 
+	stEL6851OutData				:= DMX_Master_Out, 
+	stCommandBuffer				:= stCommandBuffer, 
+	arrProcessData				:= arrProcessData);
+	
+// Controlling DMX addresses (without RDM)
+// =======================================
+// To send values to the DMX network, it is sufficient to write the wanted value in the " arrProcessData" using the address as the array index. 
+
+arrProcessData[12]	:= 221;	// Sends the value 221 to DMX address 12
+
+arrProcessData[57]	:= 0;	// Sends the value 0 to DMX address 57
+
+// for examples on controlling DMX devices via RDM
+// ===============================================
+// Please use the example described in the link below or contact Beckhoff
+// https://infosys.beckhoff.com/content/1033/tcplclibdmx/html/sample02.htm?id=1245473112320324804]]></ST>
+    </Implementation>
+    <LineIds Name="P_DMX_Master">
+      <LineId Id="30" Count="1" />
+      <LineId Id="10" Count="17" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="37" Count="3" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="44" Count="2" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="47" Count="2" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

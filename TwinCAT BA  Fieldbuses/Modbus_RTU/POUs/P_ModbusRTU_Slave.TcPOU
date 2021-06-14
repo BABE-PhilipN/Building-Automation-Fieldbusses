@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="P_ModbusRTU_Slave" Id="{0e2d0cc4-f09e-428c-b507-5953486d81de}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_ModbusRTU_Slave
+VAR
+// Communication block
+// ===================
+	// make sure to choose the correct block depending on the type of serial port
+	fbModbus			: ModbusRtuSlave_PcCOM;	
+	//	fbModbus		: ModbusRtuSlave_KL6x5B;	
+	//	fbModbus		: ModbusRtuSlave_KL6x22B;	
+	
+	
+// Definition of Modbus data access areas
+// ======================================
+	// Check the following options *)
+
+	// hardware independent access to the input, output and memory area
+	// The ranges are declared with a length of only one word
+	// Nevertheless ModbusRTU will access the full length defined above
+
+	(*
+	Inputs 	AT %IW0:	WORD;
+	Outputs AT %QW0:	WORD;
+	Memory 	AT %MW0:	WORD;
+	*)
+
+	// The ranges are declared as arrays here (optional)
+	Inputs 	AT %IW0:	ARRAY[0..255] OF WORD;
+	Outputs AT %QW0:	ARRAY[0..255] OF WORD;
+	Memory 	AT %MW0:	ARRAY[0..2047] OF WORD;
+
+	// hardware independent access to normal variables
+	// (no input, ouput or memory range)
+	
+	(*
+	Inputs	:	ARRAY[0..255] OF WORD;
+	Outputs :	ARRAY[0..255] OF WORD;
+	Memory 	:	ARRAY[0..255] OF WORD;
+	*)
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[{region "Hardware set up"}
+// Linking to serial port
+// ======================
+
+// The IO's to link to the serial port are declared inside of the FB ModbusRtuMasterV2_XXXXX.
+// By building/compiling the program, these IO will be generate in the PLC instance, ready to link
+// This is also the reason why there are FB's for every type of serial port.
+
+// Communication parameters serial port
+// ====================================
+	 
+// Make sure to set up the correct communication parameters for the serial port, like:
+//		* Baudrate
+//		* Data bits
+//		* Stop bits
+//		* Xon/Xoff
+
+// In case you are using an EL terminal, please set these CoE Online parameters:
+//		* 	8000:05		"Enable transfer rate opmitization"		--> FALSE
+//		*	8000:06		"Enable half duplex"					--> FALSE		(if 4 wires are used for RS485)
+//																--> TRUE		(if 2 wires are used for RS485)	 
+
+{endregion}
+
+// Communication block
+// ===================
+	// Device Address is 17
+	fbModbus(
+		UnitID			:= 17, 
+		AdrInputs		:= ADR(Inputs), 
+		SizeInputBytes	:= SIZEOF(Inputs), 
+		AdrOutputs		:= ADR(Outputs), 
+		SizeOutputBytes	:= SIZEOF(Outputs), 
+		AdrMemory		:= ADR(Memory), 
+		SizeMemoryBytes	:= SIZEOF(Memory), 
+		ErrorId			=> );]]></ST>
+    </Implementation>
+    <LineIds Name="P_ModbusRTU_Slave">
+      <LineId Id="39" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="36" Count="2" />
+      <LineId Id="45" Count="5" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="53" Count="2" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="258" Count="0" />
+      <LineId Id="220" Count="7" />
+      <LineId Id="67" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="P_DMX_Slave" Id="{474d260a-3c5c-4c08-b180-67269b2b06e3}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_DMX_Slave
+VAR
+	(*	As a default only channels 1-64 are activated in the process image of the DMX Slave terminal (EL6851-0010)
+		If more or other channels are wanted, this can be modified in the tab "Process Data" of the terminal:
+	*)
+
+	DMX_Slave_In		AT %I*	: ARRAY[1..64] OF BYTE;
+		
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*	The data received from the DMX network can be found in the array linked to the peripheral data range from the terminal in the corresponding index 
+	and the value can be used in the PLC program as needed.
+
+*)
+
+DMX_Slave_In[7];	(* Contains the data for Channel 7 in the received DMX telegram *) 
+
+DMX_Slave_In[35];	(* Contains the data for Channel 35 in the received DMX telegram *) 
+]]></ST>
+    </Implementation>
+    <LineIds Name="P_DMX_Slave">
+      <LineId Id="5" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

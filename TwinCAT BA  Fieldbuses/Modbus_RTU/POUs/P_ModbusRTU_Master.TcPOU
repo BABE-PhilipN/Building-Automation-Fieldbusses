@@ -1,0 +1,251 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="P_ModbusRTU_Master" Id="{e07a665c-0de0-4d40-abfa-7b5b1541e25b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_ModbusRTU_Master
+VAR
+// Communication block
+// ===================
+	// make sure to choose the correct block depending on the type of serial port
+	fbModbus		: ModbusRtuMasterV2_PcCOM;	
+	//	fbModbus		: ModbusRtuMasterV2_KL6x5B;	
+	//	fbModbus		: ModbusRtuMasterV2_KL6x22B;	
+	
+// Send and Receive data 
+// =====================
+	Send			: ARRAY [0..100] OF WORD;
+	Rcv				: ARRAY [0..100] OF WORD;
+
+	
+// Sequence 
+// ========
+	bStart			: BOOL;
+	Step			: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[{region "Hardware set up"}
+// Linking to serial port
+// ======================
+
+// The IO's to link to the serial port are declared inside of the FB ModbusRtuMasterV2_XXXXX.
+// By building/compiling the program, these IO will be generate in the PLC instance, ready to link
+// This is also the reason why there are FB's for every type of serial port.
+
+// Communication parameters serial port
+// ====================================
+	 
+// Make sure to set up the correct communication parameters for the serial port, like:
+//		* Baudrate
+//		* Data bits
+//		* Stop bits
+//		* Xon/Xoff
+
+// In case you are using an EL terminal, please set these CoE Online parameters:
+//		* 	8000:05		"Enable transfer rate opmitization"		--> FALSE
+//		*	8000:06		"Enable half duplex"					--> FALSE		(if 4 wires are used for RS485)
+//																--> TRUE		(if 2 wires are used for RS485)	 
+
+{endregion}
+
+// Communication block
+// ===================
+
+// The communication block itself does not need to be called.
+// Depending on the wanted action (read registers, read input registers, write registeres, ...), the corresponding action will be called.
+// But since all these actions use the inputs/outputs from the FB itself, it is recommended to use a sequence for calling the actions
+
+
+// Sequence
+// ========
+
+CASE Step OF
+	0:		// Wait for start
+		IF bStart THEN
+			Step := 100;
+		END_IF
+	100:	// Read input registers 4 - 9 (so 6 modbus registers), from device address 10
+		fbModbus.ReadInputRegs(Execute		:= FALSE);		// call actions with "Execute := FALSE", to be sure to have a positive edge to trigger the reading	
+		fbModbus.ReadInputRegs(
+			UnitID		:= 10, 
+			Quantity	:= 6, 
+			MBAddr		:= 4,		// Keep in mind that for some devices you have to substract 1 from the register.
+			cbLength	:= SIZEOF(Rcv), 
+			pMemoryAddr	:= ADR(Rcv), 
+			Execute		:= TRUE, 
+			Timeout		:= T#100MS,	// Always insert a time out, otherwise a time of 0ms will be used, resulting in a time out  
+			BUSY		=> , 
+			Error		=> , 
+			ErrorId		=> , 
+			cbRead		=> );
+		
+		IF fbModbus.BUSY THEN
+			Step := 110;
+		END_IF
+
+	110:
+		IF NOT fbModbus.BUSY THEN
+			IF fbModbus.Error THEN
+				// Code to be done in case of an error reading data, f.e.:
+				Step := 100;	// if you want to try again
+				Step := 0;		// if you want to retry the complete cycle
+			ELSE
+				// Code to be done in case of no error reading data, f.e.:
+				
+				// Decode received data
+				// Since modbus as a standard only has words, data can be converted to store them in words.
+				// for esample, reals are sometimes stored in the words by multiplying them by 10 or by 100, depeding on the wanted resolution
+				
+				// Reg4Value := Rcv[0] * 0.1;
+				// Reg5Value := Rcv[0] * 0.01;
+				// Reg6Value := Rcv[0] * 2;
+				// Reg7Value := Rcv[0] * 0.1;
+				// Reg8Value := Rcv[0] * 0.1;
+				// Reg9Value := Rcv[0] * 0.1;
+				
+				Step := 200;
+			END_IF
+		END_IF
+
+	200:	// Read registers 12 - 15 (so 4 modbus registers), from device address 15
+		fbModbus.ReadRegs(Execute		:= FALSE);		// call actions with "Execute := FALSE", to be sure to have a positive edge to trigger the reading	
+		fbModbus.ReadRegs(
+			UnitID		:= 15, 
+			Quantity	:= 4, 
+			MBAddr		:= 12,		// Keep in mind that for some devices you have to substract 1 from the register.
+			cbLength	:= SIZEOF(Rcv), 
+			pMemoryAddr	:= ADR(Rcv), 
+			Execute		:= TRUE, 
+			Timeout		:= T#100MS,	// Always insert a time out, otherwise a time of 0ms will be used, resulting in a time out  
+			BUSY		=> , 
+			Error		=> , 
+			ErrorId		=> , 
+			cbRead		=> );
+		
+		IF fbModbus.BUSY THEN
+			Step := 210;
+		END_IF
+
+	210:
+		IF NOT fbModbus.BUSY THEN
+			IF fbModbus.Error THEN
+				// Code to be done in case of an error reading data, f.e.:
+				Step := 200;	// if you want to try again
+				Step := 0;		// if you want to retry the complete cycle
+			ELSE
+				// Code to be done in case of no error reading data, f.e.:
+				
+				// Decode received data
+				// Since modbus as a standard only has words, data can be converted to store them in words.
+				// for esample, reals are sometimes stored in the words by multiplying them by 10 or by 100, depeding on the wanted resolution
+				
+				// Reg12Value := Rcv[0] * 0.1;
+				// Reg13Value := Rcv[0] * 0.01;
+				// Reg14Value := Rcv[0] * 2;
+				// Reg15Value := Rcv[0] * 0.1;
+				
+				Step := 300;
+			END_IF
+		END_IF
+
+	300:	// Write registers 25 - 34 (so 10 modbus registers), to device address 27
+
+		// fill data to send:
+		Send[0]	:= 1254;		// Data for modbus register 25
+		Send[1]	:= 751;			// Data for modbus register 26
+		Send[2]	:= 2300;		// Data for modbus register 27
+		Send[3]	:= 254;			// Data for modbus register 28
+		Send[5]	:= 128;			// Data for modbus register 29
+		Send[5]	:= 775;			// Data for modbus register 30
+		Send[6]	:= 943;			// Data for modbus register 31
+		Send[7]	:= 225;			// Data for modbus register 32
+		Send[8].0	:= TRUE;	// Data for modbus register 33
+		Send[8].1	:= TRUE;	// Data for modbus register 33
+		Send[8].2	:= TRUE;	// Data for modbus register 33
+		Send[8].5	:= TRUE;	// Data for modbus register 33
+		Send[8].7	:= TRUE;	// Data for modbus register 33
+		Send[9]	:= 567;			// Data for modbus register 34
+ 	
+		fbModbus.WriteRegs(Execute		:= FALSE);		// call actions with "Execute := FALSE", to be sure to have a positive edge to trigger the reading	
+		fbModbus.WriteRegs(
+			UnitID		:= 27, 
+			Quantity	:= 10, 
+			MBAddr		:= 25,		// Keep in mind that for some devices you have to substract 1 from the register.
+			cbLength	:= SIZEOF(Send), 
+			pMemoryAddr	:= ADR(Send), 
+			Execute		:= TRUE, 
+			Timeout		:= T#100MS,	// Always insert a time out, otherwise a time of 0ms will be used, resulting in a time out  
+			BUSY		=> , 
+			Error		=> , 
+			ErrorId		=> , 
+			cbRead		=> );
+		
+		IF fbModbus.BUSY THEN
+			Step := 310;
+		END_IF
+
+	310:
+		IF NOT fbModbus.BUSY THEN
+			IF fbModbus.Error THEN
+				// Code to be done in case of an error reading data, f.e.:
+				Step := 300;	// if you want to try again
+				Step := 0;		// if you want to retry the complete cycle
+			ELSE
+				// Code to be done in case of no error reading data, f.e.:
+				
+				Step := 0;		// Return to first step
+			END_IF
+		END_IF
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="P_ModbusRTU_Master">
+      <LineId Id="39" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="36" Count="2" />
+      <LineId Id="45" Count="5" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="53" Count="2" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="63" Count="2" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="68" Count="3" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="73" Count="5" />
+      <LineId Id="83" Count="4" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="89" Count="6" />
+      <LineId Id="98" Count="1" />
+      <LineId Id="101" Count="9" />
+      <LineId Id="112" Count="4" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="118" Count="36" />
+      <LineId Id="157" Count="5" />
+      <LineId Id="202" Count="2" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="206" Count="6" />
+      <LineId Id="216" Count="3" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="163" Count="26" />
+      <LineId Id="199" Count="2" />
+      <LineId Id="67" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

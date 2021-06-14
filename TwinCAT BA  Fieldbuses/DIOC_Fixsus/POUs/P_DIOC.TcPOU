@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="P_DIOC" Id="{40f147f0-d286-47ec-928d-7c88628fe167}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_DIOC
+VAR
+	
+	fbTP10_Complete		: FB_TP10;
+	
+	TP10_1_Leds			: ARRAY[0..10] OF BOOL;
+	TP10_1_Buttons		: ARRAY [0..12] OF BOOL;
+	TP10_1_Temp			: REAL;
+	
+	fbTP10_Compact		: FB_TP10;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[{region "General information"}
+// General information
+// ===================
+
+// Online info: Libraries and manuals (TC2 and TC3)
+	// https://www.upzio.com/support
+
+// DIOC: 
+// 		* only works with EL terminals because the DIOC pulse train on the IO need to be very accurate in regards to timing
+//		* needs a 12ms task with the attribute {attribute 'TcCallAfterOutputUpdate'} to trigger the IO update at the beginning of the task
+//		  This attribute needs to be in the POU that is linked with the task, so:
+//			* if the task calls the POU "MAIN", and "MAIN" calls "P_DIOC" 	--> the attribute needs to be in "MAIN"
+//					(in this example the attribute is located in "MAIN")
+//			* if the task calls the POU "P_DIOC" directly 					-->	the attribute needs to be in "P_DIOC"
+
+// the IO's to link the FB to the physical IO terminals are embedded in the FB.		
+  
+{endregion}
+
+
+{region "FB with all inputs/outputs"}
+// The FB for a TP10 has many inputs/outputs that are only needed if you want to use other settings 
+// than the default ones	 
+fbTP10_Complete(
+	bEn						:= , 
+	bLocate					:= , 					// Makes the TP10 flash green 3 times to know which one you are currently using
+	bRoomAnalyser			:= ,            		
+	bWallSurface			:= ,            		
+	arr_bLeds				:= , 					// white touch leds (array id 1 is touch button 1)
+	iIntensityLeds			:= , 					// intensity of the white leds (0..100)
+	arr_bMasks				:= , 					// used to turn off the touch buttons (array id 1 is touch button 1)
+	arr_sButtonComments		:= , 					// comments for every button that is visible on the visualisation
+	iHapticIntensity		:= , 					// intensity of the sound when pressing a button (0..100)
+	iButtonSensitivity		:= , 					// sensitivity of the buttons, only used if value > 0, (values from 1-99 are possible, 99 is the lowest sensitivity, 1 is the highest sensitivity, standard value is 55)
+	dwRgb					:= ,					// color of the rgb leds
+		 												// RGB values of the TP10: 0-255
+		 												// 	nFillColor := 16#1E8FE03F;
+		 												// 	?1E: intensity in percentage
+		 												// 	?8F: red
+		 												// 	?E0: green
+		 												// 	?3F: blue
+	iRGBIntensity			:= , 					// if intensity > -1 then use this value
+	iIntervalRoomtemp		:= , 					// retrieval time of the temperature sensor ( in seconds)
+	iIntervalRoomHumidity	:= , 					// retrieval time of the humidity sensor ( in seconds)
+	iIntervalCO2			:= , 					// retrieval time of the CO2 sensor ( in seconds)
+	iIntervalCO				:= , 					// retrieval time of the CO sensor ( in seconds)
+	iIntervalVOC			:= , 					// retrieval time of the VOC sensor ( in seconds)
+	iIntervalIllumination	:= , 					// retrieval time of the Illumination sensor ( in seconds)
+	bReset					:= , 					// true on startup to ensure the device is completely reset when the program is restarted to quickly after the device has been disabled
+	bResetVOC				:= , 					// if this input is true, the VOC/eCO2 sensor will be turned off for 1000 cycles
+	qarr_bButtons			=> , 					// True if a button is pressed (array id 1 is button 1)
+	qfRoomTemperature		=> , 					// measurement value of the temperature
+	qfVOC					=> , 					// measurement value of the VOC
+	qfCO2					=> , 					// measurement value of the CO2
+	qfHumidity				=> , 					// measurement value of the humidity
+	qfLux					=> , 					// measurement value of the lux
+	qfDewpoint				=> , 					// calculated dewpoint value, dependant on temperature and humidity measurements
+	qdtVersionHw			=> , 					// Hardware version of the dioc device
+	qdtVersionSw			=> , 					// software version of the dioc device
+	qdtVersionReg			=> , 					// register version of the dioc device
+	qsUniqueId				=> , 					// Unique id the dioc device
+	qrVoltageLevelA			=> , 					// Voltage level on the DIOC-A line
+	qrVoltageLevelB			=> , 					// Voltage level on the DIOC-B line
+	qbDeviceActive			=> );					// True if the device is active
+		 
+{endregion}
+			 
+{region "FB with only the needed inputs/outputs"}
+// The FB for a TP10 has many inputs/outputs that are only needed if you want to use other settings 
+// than the default ones	 
+fbTP10_Complete(
+	arr_bLeds				:= TP10_1_Leds,			// white touch leds (array id 1 is touch button 1)
+	iIntensityLeds			:= , 					// intensity of the white leds (0..100)
+	iHapticIntensity		:= , 					// intensity of the sound when pressing a button (0..100)
+	dwRgb					:= ,					// color of the rgb leds
+		 												// RGB values of the TP10: 0-255
+		 												// 	nFillColor := 16#1E8FE03F;
+		 												// 	?1E: intensity in percentage
+		 												// 	?8F: red
+		 												// 	?E0: green
+		 												// 	?3F: blue
+	iRGBIntensity			:= , 					// if intensity > -1 then use this value
+	bReset					:= , 					// true on startup to ensure the device is completely reset when the program is restarted to quickly after the device has been disabled
+	bResetVOC				:= , 					// if this input is true, the VOC/eCO2 sensor will be turned off for 1000 cycles
+	qarr_bButtons			=> TP10_1_Buttons,		// True if a button is pressed (array id 1 is button 1)
+	qfRoomTemperature		=> TP10_1_Temp,			// measurement value of the temperature
+	qfVOC					=> , 					// measurement value of the VOC
+	qfCO2					=> , 					// measurement value of the CO2
+	qfHumidity				=> , 					// measurement value of the humidity
+	qfLux					=> , 					// measurement value of the lux
+	qfDewpoint				=> ); 					// calculated dewpoint value, dependant on temperature and humidity measurements
+		 
+{endregion}
+
+			 			 ]]></ST>
+    </Implementation>
+    <LineIds Name="P_DIOC">
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="72" Count="1" />
+      <LineId Id="29" Count="11" />
+      <LineId Id="76" Count="4" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="41" Count="21" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="83" Count="3" />
+      <LineId Id="91" Count="1" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="97" Count="7" />
+      <LineId Id="111" Count="8" />
+      <LineId Id="127" Count="1" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="82" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

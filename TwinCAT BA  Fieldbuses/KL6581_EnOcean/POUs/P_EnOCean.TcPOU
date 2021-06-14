@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="P_EnOCean" Id="{a6d8ab98-c073-407a-b5dd-5af2caf7eedb}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_EnOCean
+VAR
+	KL6581_In		AT %I*	: KL6581_Input;
+	KL6581_Out		AT %Q*	: KL6581_Output;
+
+	fbKL6581				: FB_KL6581;
+	stKL6581				: STR_KL6581;
+	fbRec_RPS_Switch: FB_Rec_RPS_Switch;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Communication and configuration block
+// =====================================
+fbKL6581(
+	bInit			:= TRUE, 
+	nIdx			:= 1, 
+	bReady			=> , 
+	bBusy			=> , 
+	bError			=> , 
+	iErrorID		=> , 
+	str_KL6581		=> stKL6581, 
+	stKL6581_in		:= KL6581_In, 
+	stKL6581_out	:= KL6581_Out);
+	
+	(* Special requirements for this FB "KL6301"
+			* This block may only be called once per KL6581!
+			* It must be called in the same task as the send and receive blocks!
+			* In the PLC project this block may only be called once per cycle!
+			* A PLC project may contain a maximum of 64 KL6581 terminals!
+	*)
+
+// Receive status from an EnOcean device with 4 pushbuttons
+// and ID 16#002536BF
+// ========================================================
+	(*
+		This function block receives data from a switch that were received via EnOcean.
+		The block outputs the data in a data structure.
+	*)
+fbRec_RPS_Switch(
+	str_KL6581			:= stKL6581, 
+	byNode				:= 0, 
+	dw_ID				:= 16#002536BF, 
+	str_EnOceanSwitch	=> , 
+	by_Node				=> , 
+	bReceive			=> );]]></ST>
+    </Implementation>
+    <LineIds Name="P_EnOCean">
+      <LineId Id="9" Count="1" />
+      <LineId Id="12" Count="8" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="30" Count="2" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="36" Count="5" />
+      <LineId Id="23" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

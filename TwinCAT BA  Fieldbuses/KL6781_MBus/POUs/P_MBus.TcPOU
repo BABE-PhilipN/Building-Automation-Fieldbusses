@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="P_MBus" Id="{f4075dfd-46aa-449c-9d87-a94e7e4163bb}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_MBus
+VAR
+	fbMBUS_EMU_32x7		: FB_MBUS_EMU_32x7;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbMBUS_EMU_32x7(
+	usiAddress			:= 15, 					// MBus address of the meter
+	stSecAdr			:= , 					// Only used if you address via the secundairy address
+	eBaudrate			:= , 					// Default setting = 2400
+	bStart				:= , 					// A raising edge will trigger a single read
+	bSND_NKE			:= , 					
+	bReadInit			:= , 					// Trigger a read when the PLC starts
+	tMinSendTime		:= , 					// Default = 2s --> update time for automatic reading
+	usiUnit				:= , 					// Unit of the energy values to be output by the block. 0=W(h) / 1=KW(h) / 2 =MW(h) / 3=GW(h)
+	bDisabled			:= , 
+	bBusy				=> , 
+	bReady				=> , 
+	bError				=> , 
+	eError				=> , 
+	dwIdNumber			=> , 
+	byStatus			=> , 
+	byGEN				=> , 
+	byCounter			=> , 
+	usiRecivedAdr		=> , 
+	eMedium				=> , 
+	sMan				=> , 
+	stOperatingHours	=> , 					// Data from meter
+	stEnergy			=> ,  					// Data from meter
+	stPower				=> ,  					// Data from meter
+	stInitCounter		=> ,  					// Data from meter
+	stDeviceError		=> , 
+	stCom				:= GVL_IO.stCom);]]></ST>
+    </Implementation>
+    <LineIds Name="P_MBus">
+      <LineId Id="7" Count="25" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,1069 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="P_BAcnetRev14_Local" Id="{76afab88-a8df-4b8a-b436-e5b4ac5b3e56}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_BAcnetRev14_Local
+VAR
+//	=======================================================================================================================================================================
+//	Retrieving the BACnet Adapter state
+//	=======================================================================================================================================================================
+	fbBACnet_Server			: FB_BACnet_Server;
+
+//	=======================================================================================================================================================================
+//	Creation of the Master Node: Collection of Buildings
+//	=======================================================================================================================================================================
+	FBNode_Buildings		: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+//														iParent			:= ,								// Since the Main Node has no Parent, this can be ignored
+//														nObjectInstance	:= ,
+														sObjectName		:= 'Building',
+														sDescription	:= 'Collection of all buildings',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+
+//	=======================================================================================================================================================================
+//	Creation of the Sub Node: one Collection per Building
+//	=======================================================================================================================================================================
+	FBNode_OfficeBuilding	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_Buildings,				// Parent node for this Object
+//														nObjectInstance	:= ,								// If a specific Instance Number is wanted, it can be filled in
+																											// if no number is set, it will be choosen automatically
+														sObjectName		:= '\/Office',						// The '\/' creates an Object name 
+																											// like "ParentName" & "_" & "sObjectName"
+																											// In this case: "Building_Office" 
+														sDescription	:= 'Office Building',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+	FBNode_ProductionPlant	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_Buildings,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/ProductionPlant',
+														sDescription	:= 'Production Plant',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+	FBNode_Warehouse		: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_Buildings,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/Warehouse',
+														sDescription	:= 'Warehouse',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+
+//	=======================================================================================================================================================================
+//	Creation of the Sub Node: one Collection per Level in the Office Building
+//	=======================================================================================================================================================================
+	FBNode_OfficeLevel_0	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_OfficeBuilding,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/Level0',
+														sDescription	:= 'Office Building Level 0',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+	FBNode_OfficeLevel_1	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_OfficeBuilding,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/Level1',
+														sDescription	:= 'Office Building Level 1',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+	FBNode_OfficeLevel_2	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_OfficeBuilding,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/Level2',
+														sDescription	:= 'Office Building Level 2',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+
+//	=======================================================================================================================================================================
+//	Creation of the Sub Node: one Collection per Level in the Production Plant Building
+//	=======================================================================================================================================================================
+	FBNode_ProdPlantLevel_0	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_ProductionPlant,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/Level0',
+														sDescription	:= 'Production Plant Level 0',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+	FBNode_ProdPlantLevel_1	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_ProductionPlant,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/Level1',
+														sDescription	:= 'Production Plant Level 1',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+	FBNode_ProdPlantLevel_2	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_ProductionPlant,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/Level2',
+														sDescription	:= 'Production Plant Level 2',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+
+//	=======================================================================================================================================================================
+//	Creation of the Sub Node: one Collection per Level in the Warehouse Building
+//	=======================================================================================================================================================================
+	FBNode_WarehouseLevel_0	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_Warehouse,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/Level0',
+														sDescription	:= 'Warehouse Level 0',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+	FBNode_WarehouseLevel_1	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_Warehouse,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/Level1',
+														sDescription	:= 'Warehouse Level 1',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+	FBNode_WarehouseLevel_2	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_Warehouse,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/Level2',
+														sDescription	:= 'Warehouse Level 2',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+	FBNode_WarehouseLevel_3	: FB_BACnet_View	:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_Warehouse,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/Level3',
+														sDescription	:= 'Warehouse Level 3',
+														eNodeType 		:= E_BACnet_NodeType.eCollection
+													);
+//	=======================================================================================================================================================================
+//	Creation of the objects: Multiple objects per Level in the Office Building
+//	=======================================================================================================================================================================
+
+	fbBACnet_AI_OfficeBuilding_Level0_ActTemp: FB_BACnet_AI
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_OfficeLevel_0,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/ActualTemperature',
+														sDescription	:= 'Office Building Level 0 Actual Temperature'
+													);
+	fbBACnet_AV_OfficeBuilding_Level0_SetTemp: FB_BACnet_AV
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_OfficeLevel_0,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/SetTemperature',
+														sDescription	:= 'Office Building Level 0 Set Temperature'
+													)	;
+	fbBACnet_AI_OfficeBuilding_Level1_ActTemp: FB_BACnet_AI
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_OfficeLevel_1,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/ActualTemperature',
+														sDescription	:= 'Office Building Level 1 Actual Temperature'
+													);
+	fbBACnet_AV_OfficeBuilding_Level1_SetTemp: FB_BACnet_AV
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_OfficeLevel_1,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/SetTemperature',
+														sDescription	:= 'Office Building Level 1 Set Temperature'
+													)	;
+	fbBACnet_AI_OfficeBuilding_Level2_ActTemp: FB_BACnet_AI
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_OfficeLevel_2,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/ActualTemperature',
+														sDescription	:= 'Office Building Level 2 Actual Temperature'
+													);
+	fbBACnet_AV_OfficeBuilding_Level2_SetTemp: FB_BACnet_AV
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_OfficeLevel_2,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/SetTemperature',
+														sDescription	:= 'Office Building Level 2 Set Temperature'
+													)	;
+
+//	=======================================================================================================================================================================
+//	Creation of the objects: Multiple objects per Level in the Production Plant Building
+//	=======================================================================================================================================================================
+
+	fbBACnet_AI_ProdPlantBuilding_Level0_ActTemp: FB_BACnet_AI
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_ProdPlantLevel_0,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/ActualTemperature',
+														sDescription	:= 'Production Plant Building Level 0 Actual Temperature'
+													);
+	fbBACnet_AV_ProdPlantBuilding_Level0_SetTemp: FB_BACnet_AV
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_ProdPlantLevel_0,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/SetTemperature',
+														sDescription	:= 'Production Plant Building Level 0 Set Temperature'
+													)	;
+	fbBACnet_AI_ProdPlantBuilding_Level1_ActTemp: FB_BACnet_AI
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_ProdPlantLevel_1,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/ActualTemperature',
+														sDescription	:= 'Production Plant Building Level 1 Actual Temperature'
+													);
+	fbBACnet_AV_ProdPlantBuilding_Level1_SetTemp: FB_BACnet_AV
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_ProdPlantLevel_1,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/SetTemperature',
+														sDescription	:= 'Production Plant Building Level 1 Set Temperature'
+													)	;
+	fbBACnet_AI_ProdPlantBuilding_Level2_ActTemp: FB_BACnet_AI
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_ProdPlantLevel_2,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/ActualTemperature',
+														sDescription	:= 'Production Plant Building Level 2 Actual Temperature'
+													);
+	fbBACnet_AV_ProdPlantBuilding_Level2_SetTemp: FB_BACnet_AV
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_ProdPlantLevel_2,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/SetTemperature',
+														sDescription	:= 'Production Plant Building Level 2 Set Temperature'
+													)	;
+
+//	=======================================================================================================================================================================
+//	Creation of the objects: Multiple objects per Level in the Warehouse Building
+//	=======================================================================================================================================================================
+
+	fbBACnet_AI_WarehouseBuilding_Level0_ActTemp: FB_BACnet_AI
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_WarehouseLevel_0,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/ActualTemperature',
+														sDescription	:= 'Warehouse Building Level 0 Actual Temperature'
+													);
+	fbBACnet_AV_WarehouseBuilding_Level0_SetTemp: FB_BACnet_AV
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_WarehouseLevel_0,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/SetTemperature',
+														sDescription	:= 'Warehouse Building Level 0 Set Temperature'
+													)	;
+	fbBACnet_AI_WarehouseBuilding_Level1_ActTemp: FB_BACnet_AI
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_WarehouseLevel_1,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/ActualTemperature',
+														sDescription	:= 'Warehouse Building Level 1 Actual Temperature'
+													);
+	fbBACnet_AV_WarehouseBuilding_Level1_SetTemp: FB_BACnet_AV
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_WarehouseLevel_1,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/SetTemperature',
+														sDescription	:= 'Warehouse Building Level 1 Set Temperature'
+													)	;
+	fbBACnet_AI_WarehouseBuilding_Level2_ActTemp: FB_BACnet_AI
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_WarehouseLevel_2,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/ActualTemperature',
+														sDescription	:= 'Warehouse Building Level 2 Actual Temperature'
+													);
+	fbBACnet_AV_WarehouseBuilding_Level2_SetTemp: FB_BACnet_AV
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_WarehouseLevel_2,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/SetTemperature',
+														sDescription	:= 'Warehouse Building Level 2 Set Temperature'
+													)	;
+	fbBACnet_AI_WarehouseBuilding_Level3_ActTemp: FB_BACnet_AI
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_WarehouseLevel_3,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/ActualTemperature',
+														sDescription	:= 'Warehouse Building Level 2 Actual Temperature'
+													);
+	fbBACnet_AV_WarehouseBuilding_Level3_SetTemp: FB_BACnet_AV
+												:=	(
+														Server			:= fbBACnet_Server,
+														iParent			:= FBNode_WarehouseLevel_3,
+//														nObjectInstance	:= ,
+														sObjectName		:= '\/SetTemperature',
+														sDescription	:= 'Warehouse Building Level 3 Set Temperature'
+													)	;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[_000_BACnet_Server();
+
+_100_Buildings();
+
+_110_OfficeBuilding();
+_120_ProductionPlant();
+_130_Warehouse();	
+
+]]></ST>
+    </Implementation>
+    <Action Name="_000_BACnet_Server" Id="{382729c8-e008-4c54-8423-8c23aae42eb9}">
+      <Implementation>
+        <ST><![CDATA[//	=======================================================================================================================================================================
+//	Retrieving the BACnet Adapter state
+//	=======================================================================================================================================================================
+
+fbBACnet_Server(
+	Adapter				:= P_BacnetRev14.fbBACnet_Adapter, 
+	bSupportBackup		:= , 
+	bDisableWOC			:= , 
+	tAmsPort			:= , 
+	bReset				:= , 
+	bWritePersistent	:= , 
+	bReload				:= , 
+	nRevision			=> , 
+	stAdsConn			=> , 
+	eSystemStatus		=> , 
+	bBackupActive		=> , 
+	bWritePersisActive	=> , 
+	bOperational		=> , 
+	bWOCDisabled		=> , 
+	bFirstCycle			=> , 
+	bInitialized		=> , 
+	eErrorID			=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="_100_Buildings" Id="{361186b3-d29a-4fb3-9934-551bd498a94f}">
+      <Implementation>
+        <ST><![CDATA[//	=======================================================================================================================================================================
+//	Creation of the Master Node: Collection of Buildings
+//	=======================================================================================================================================================================
+FBNode_Buildings();
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="_110_OfficeBuilding" Id="{025b91d5-d9a4-484c-bd29-f5713221d429}">
+      <Implementation>
+        <ST><![CDATA[//	=======================================================================================================================================================================
+//	Creation of the Sub Node: one Collection per Building
+//	=======================================================================================================================================================================
+FBNode_OfficeBuilding();
+
+//	=======================================================================================================================================================================
+//	Creation of the Sub Node: one Collection per Level in a Building
+//	=======================================================================================================================================================================
+FBNode_OfficeLevel_0();
+FBNode_OfficeLevel_1();
+FBNode_OfficeLevel_2();
+
+//	=======================================================================================================================================================================
+//	Creation of the objects: Multiple objects per Level in the Office Building
+//	=======================================================================================================================================================================
+fbBACnet_AI_OfficeBuilding_Level0_ActTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	sDeviceType				:= , 
+	nUpdateInterval			:= , 
+	fMinPresValue			:= , 
+	fMaxPresValue			:= , 
+	fFaultDeadband			:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	nAvgFilterCycles		:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> , 				
+	fVal					:= );				// Actual temperature can be programmed as a REAL value
+	
+fbBACnet_AV_OfficeBuilding_Level0_SetTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	bEnPgm					:= , 
+	fValPgm					:= , 
+	fRelinquishDefault		:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> );				// Temperature set point to be used for 
+	
+fbBACnet_AI_OfficeBuilding_Level1_ActTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	sDeviceType				:= , 
+	nUpdateInterval			:= , 
+	fMinPresValue			:= , 
+	fMaxPresValue			:= , 
+	fFaultDeadband			:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	nAvgFilterCycles		:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> , 
+	fVal					:= );
+	
+fbBACnet_AV_OfficeBuilding_Level1_SetTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	bEnPgm					:= , 
+	fValPgm					:= , 
+	fRelinquishDefault		:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> );
+	
+fbBACnet_AI_OfficeBuilding_Level2_ActTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	sDeviceType				:= , 
+	nUpdateInterval			:= , 
+	fMinPresValue			:= , 
+	fMaxPresValue			:= , 
+	fFaultDeadband			:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	nAvgFilterCycles		:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> , 
+	fVal					:= );
+	
+fbBACnet_AV_OfficeBuilding_Level2_SetTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	bEnPgm					:= , 
+	fValPgm					:= , 
+	fRelinquishDefault		:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="_120_ProductionPlant" Id="{568580fd-0666-44b3-b2a7-90fec75f6224}">
+      <Implementation>
+        <ST><![CDATA[//	=======================================================================================================================================================================
+//	Creation of the Sub Node: one Collection per Building
+//	=======================================================================================================================================================================
+FBNode_ProductionPlant();
+
+//	=======================================================================================================================================================================
+//	Creation of the Sub Node: one Collection per Level in a Building
+//	=======================================================================================================================================================================
+FBNode_ProdPlantLevel_0();
+FBNode_ProdPlantLevel_1();
+FBNode_ProdPlantLevel_2();
+
+//	=======================================================================================================================================================================
+//	Creation of the objects: Multiple objects per Level in the Production Plant Building
+//	=======================================================================================================================================================================
+fbBACnet_AI_ProdPlantBuilding_Level0_ActTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	sDeviceType				:= , 
+	nUpdateInterval			:= , 
+	fMinPresValue			:= , 
+	fMaxPresValue			:= , 
+	fFaultDeadband			:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	nAvgFilterCycles		:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> , 				
+	fVal					:= );				// Actual temperature can be programmed as a REAL value
+	
+fbBACnet_AV_ProdPlantBuilding_Level0_SetTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	bEnPgm					:= , 
+	fValPgm					:= , 
+	fRelinquishDefault		:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> );				// Temperature set point to be used for 
+	
+fbBACnet_AI_ProdPlantBuilding_Level1_ActTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	sDeviceType				:= , 
+	nUpdateInterval			:= , 
+	fMinPresValue			:= , 
+	fMaxPresValue			:= , 
+	fFaultDeadband			:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	nAvgFilterCycles		:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> , 
+	fVal					:= );
+	
+fbBACnet_AV_ProdPlantBuilding_Level1_SetTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	bEnPgm					:= , 
+	fValPgm					:= , 
+	fRelinquishDefault		:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> );
+	
+fbBACnet_AI_ProdPlantBuilding_Level2_ActTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	sDeviceType				:= , 
+	nUpdateInterval			:= , 
+	fMinPresValue			:= , 
+	fMaxPresValue			:= , 
+	fFaultDeadband			:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	nAvgFilterCycles		:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> , 
+	fVal					:= );
+	
+fbBACnet_AV_ProdPlantBuilding_Level2_SetTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	bEnPgm					:= , 
+	fValPgm					:= , 
+	fRelinquishDefault		:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="_130_Warehouse" Id="{dd44dec9-15cd-4792-b9f8-b1e83c747079}">
+      <Implementation>
+        <ST><![CDATA[//	=======================================================================================================================================================================
+//	Creation of the Sub Node: one Collection per Building
+//	=======================================================================================================================================================================
+FBNode_Warehouse();
+
+//	=======================================================================================================================================================================
+//	Creation of the Sub Node: one Collection per Level in a Building
+//	=======================================================================================================================================================================
+FBNode_WarehouseLevel_0();
+FBNode_WarehouseLevel_1();
+FBNode_WarehouseLevel_2();
+FBNode_WarehouseLevel_3();
+
+//	=======================================================================================================================================================================
+//	Creation of the objects: Multiple objects per Level in the Warehouse Building
+//	=======================================================================================================================================================================
+fbBACnet_AI_WarehouseBuilding_Level0_ActTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	sDeviceType				:= , 
+	nUpdateInterval			:= , 
+	fMinPresValue			:= , 
+	fMaxPresValue			:= , 
+	fFaultDeadband			:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	nAvgFilterCycles		:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> , 				
+	fVal					:= );				// Actual temperature can be programmed as a REAL value
+	
+fbBACnet_AV_WarehouseBuilding_Level0_SetTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	bEnPgm					:= , 
+	fValPgm					:= , 
+	fRelinquishDefault		:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> );				// Temperature set point to be used for 
+	
+fbBACnet_AI_WarehouseBuilding_Level1_ActTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	sDeviceType				:= , 
+	nUpdateInterval			:= , 
+	fMinPresValue			:= , 
+	fMaxPresValue			:= , 
+	fFaultDeadband			:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	nAvgFilterCycles		:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> , 
+	fVal					:= );
+	
+fbBACnet_AV_WarehouseBuilding_Level1_SetTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	bEnPgm					:= , 
+	fValPgm					:= , 
+	fRelinquishDefault		:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> );
+	
+fbBACnet_AI_WarehouseBuilding_Level2_ActTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	sDeviceType				:= , 
+	nUpdateInterval			:= , 
+	fMinPresValue			:= , 
+	fMaxPresValue			:= , 
+	fFaultDeadband			:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	nAvgFilterCycles		:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> , 
+	fVal					:= );
+	
+fbBACnet_AV_WarehouseBuilding_Level2_SetTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	bEnPgm					:= , 
+	fValPgm					:= , 
+	fRelinquishDefault		:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> );
+	
+fbBACnet_AI_WarehouseBuilding_Level3_ActTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	sDeviceType				:= , 
+	nUpdateInterval			:= , 
+	fMinPresValue			:= , 
+	fMaxPresValue			:= , 
+	fFaultDeadband			:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	nAvgFilterCycles		:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> , 
+	fVal					:= );
+	
+fbBACnet_AV_WarehouseBuilding_Level3_SetTemp(
+	Server					:= , 
+	nObjectInstance			:= , 
+	sObjectName				:= , 
+	sDescription			:= , 
+	bEventDetectionEnable	:= , 
+	nNotificationClass		:= , 
+	eNotifyType				:= , 
+	bEventEnable			:= , 
+	sEventMessageTextsConfig:= , 
+	nTimeDelay				:= , 
+	nTimeDelayNormal		:= , 
+	bAcknowledgeRm			:= , 
+	bEvent					=> , 
+	eReliability			=> , 
+	bEnPgm					:= , 
+	fValPgm					:= , 
+	fRelinquishDefault		:= , 
+	bEnOutOfService			:= , 
+	fCOVIncrement			:= , 
+	eUnit					:= E_BA_Unit.eTemperature_DegreesCelsius, 
+	bLowLimitEnable			:= , 
+	fLowLimitValue			:= , 
+	bHighLimitEnable		:= , 
+	fHighLimitValue			:= , 
+	fDeadband				:= , 
+	fPresentValue			=> );]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="P_BAcnetRev14_Local">
+      <LineId Id="5" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="209" Count="1" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="176" Count="0" />
+    </LineIds>
+    <LineIds Name="P_BAcnetRev14_Local._000_BACnet_Server">
+      <LineId Id="2" Count="20" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="P_BAcnetRev14_Local._100_Buildings">
+      <LineId Id="2" Count="3" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="P_BAcnetRev14_Local._110_OfficeBuilding">
+      <LineId Id="2" Count="9" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="13" Count="33" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="49" Count="19" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="70" Count="4" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="78" Count="57" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="138" Count="57" />
+      <LineId Id="137" Count="0" />
+    </LineIds>
+    <LineIds Name="P_BAcnetRev14_Local._120_ProductionPlant">
+      <LineId Id="2" Count="192" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="P_BAcnetRev14_Local._130_Warehouse">
+      <LineId Id="2" Count="193" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="198" Count="57" />
+      <LineId Id="197" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

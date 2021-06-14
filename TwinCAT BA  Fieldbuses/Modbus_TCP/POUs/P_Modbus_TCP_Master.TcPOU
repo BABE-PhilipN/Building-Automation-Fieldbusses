@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="P_Modbus_TCP_Master" Id="{1d34ad91-8bfc-4136-a18a-9d7515797db7}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_Modbus_TCP_Master
+VAR
+// Read input register 10-17 from Modbus TCP slave on IP address '192.168.0.110' with device id 1
+//===============================================================================================
+	fbMBReadInputs		: FB_MBReadInputs;
+	RcvInputRegs		: ARRAY[0..99] OF WORD;
+	ftrMBReadInputsBusy	: F_TRIG;
+
+	
+	fbMBWriteRegs		: FB_MBWriteRegs;
+	SendHoldingRegs		: ARRAY[0..99] OF WORD;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[{region "General Settings"}
+// Make sure:
+//  1. that a network port is in the same IP range as the Modbus communication partner
+//  2. that port 502 is enabled in the firewall or the firewall is disabled
+	 
+{endregion}
+
+{region "Read input registers"}
+
+// Read input register 10-17 from Modbus TCP slave on IP address '192.168.0.110' with device id 1
+//===============================================================================================
+fbMBReadInputs(
+	sIPAddr		:= '192.168.0.110', 			// IP Address of the Modbus Client
+	nTCPPort	:= 502,							// Default port for Modbus TCP 
+	nUnitID		:= 1, 							// Device address
+	nQuantity	:= 8, 							// Amount of modbus addresses to be read
+	nMBAddr		:= 10, 							// Modbus address where to start reading
+	cbLength	:= 16, 							// Amount of BYTES that will be read = 2 * amount of words
+	pDestAddr	:= ADR(RcvInputRegs[10]), 		// Where to store the data
+	bExecute	:= , 							// A raising edge will trigger the reading
+	tTimeout	:= T#100MS, 
+	bBusy		=> , 
+	bError		=> , 
+	nErrId		=> , 
+	cbRead		=> );							// Feedback on the amount of bytes that are read
+	
+ftrMBReadInputsBusy(CLK:= fbMBReadInputs.bBusy, Q=> );
+IF ftrMBReadInputsBusy.Q AND NOT fbMBReadInputs.bError THEN
+	//Decode data from client
+	;
+END_IF
+
+{endregion}
+	 
+{region "Write holding registers"}
+
+// Write holding register 9-21 to Modbus TCP slave on IP address '192.168.0.110' with device id 1
+//===============================================================================================
+
+SendHoldingRegs[9]		:= 16#7A;
+SendHoldingRegs[10]		:= 16#CE;
+
+SendHoldingRegs[11].0	:= TRUE;
+SendHoldingRegs[11].1	:= TRUE;
+SendHoldingRegs[11].2	:= FALSE;
+SendHoldingRegs[11].3	:= FALSE;
+SendHoldingRegs[11].4	:= TRUE;
+SendHoldingRegs[11].5	:= TRUE;
+SendHoldingRegs[11].6	:= FALSE;
+SendHoldingRegs[11].7	:= FALSE;
+SendHoldingRegs[11].8	:= TRUE;
+SendHoldingRegs[11].9	:= FALSE;
+
+SendHoldingRegs[12]		:= 16#2F;
+SendHoldingRegs[13]		:= 16#5D;
+SendHoldingRegs[19]		:= 16#8B;
+
+
+fbMBWriteRegs(
+	sIPAddr		:= '192.168.0.110', 			// IP Address of the Modbus Client
+	nTCPPort	:= 502,							// Default port for Modbus TCP 
+	nUnitID		:= 1, 							// Device address
+	nQuantity	:= 13, 							// Amount of words to be written to the client device
+	nMBAddr		:= 9, 							// Modbus address where to start writing
+	cbLength	:= 26, 							// Amount of bytes that are to be written = 2 * amount of words
+	pSrcAddr	:= ADR(SendHoldingRegs[9]), 
+	bExecute	:= , 							// A raising edge will trigger the reading
+	tTimeout	:= T#100MS, 
+	bBusy		=> , 
+	bError		=> , 
+	nErrId		=> );
+		 
+{endregion}
+		  ]]></ST>
+    </Implementation>
+    <LineIds Name="P_Modbus_TCP_Master">
+      <LineId Id="88" Count="0" />
+      <LineId Id="91" Count="3" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="7" Count="12" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="23" Count="3" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="41" Count="1" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="81" Count="1" />
+      <LineId Id="77" Count="1" />
+      <LineId Id="83" Count="1" />
+      <LineId Id="79" Count="1" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="73" Count="2" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="62" Count="2" />
+      <LineId Id="53" Count="3" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="59" Count="1" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="43" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

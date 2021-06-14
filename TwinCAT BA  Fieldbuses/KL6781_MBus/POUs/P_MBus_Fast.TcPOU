@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="P_MBus_Fast" Id="{503c5f3f-a6e9-4d4d-84bc-c417aab4f4ba}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_MBus_Fast
+VAR
+	fbMBUSKL6781		: FB_MBUSKL6781;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbMBUSKL6781(
+	usiRetries	:= , 
+	bStart		:= , 
+	bDisabled	:= , 
+	bBusy		=> , 
+	bReady		=> , 
+	bError		=> , 
+	eError		=> , 
+	stComIn		:= GVL_IO.stComIn, 
+	stComOut	:= GVL_IO.stComOut, 
+	stCom		:= GVL_IO.stCom);]]></ST>
+    </Implementation>
+    <LineIds Name="P_MBus_Fast">
+      <LineId Id="7" Count="9" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

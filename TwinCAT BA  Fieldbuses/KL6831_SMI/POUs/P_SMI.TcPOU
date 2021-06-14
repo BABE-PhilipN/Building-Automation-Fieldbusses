@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="P_SMI" Id="{af05ec22-0119-491c-b13e-8bfb8d86269c}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_SMI
+VAR
+	KL6831_In		AT %I*	: ST_KL6831KL6841InData;
+	KL6831_Out		AT %Q*	: ST_KL6831KL6841OutData;
+
+	fbConfig				: FB_KL6831KL6841Config;
+
+	stIn					: ST_KL6831KL6841InData;
+	stOut					: ST_KL6831KL6841OutData;
+
+	fbCommunication			: FB_KL6831KL6841Communication;
+	stCommandBuffer			: ST_SMICommandBuffer;
+	fbDown					: FB_SMIDown;
+	fbUp					: FB_SMIUp;
+	fbDiag					: FB_SMIDiagAll;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Configuration block
+// ===================
+fbConfig(
+	bConfigurate			:= , 
+	eCommandKBusWatchdog	:= E_SMIConfigurationCommands.eSMICommandUp, 
+	eCommandDI1RisingEdge	:= E_SMIConfigurationCommands.eSMICommandUp, 
+	eCommandDI1FallingEdge	:= E_SMIConfigurationCommands.eSMICommandDoNothing, 
+	eCommandDI2RisingEdge	:= E_SMIConfigurationCommands.eSMICommandDown, 
+	eCommandDI2FallingEdge	:= E_SMIConfigurationCommands.eSMICommandDoNothing, 
+	dwOptions				:= , 
+	bBusy					=> , 
+	bError					=> , 
+	udiErrorId				=> , 
+	wTerminalDescription	=> , 
+	wFirmwareVersion		=> , 
+	sDescription			=> , 
+	stInDataTerminal		:= KL6831_In, 
+	stOutDataTerminal		:= KL6831_Out, 
+	stInData				:= stIn, 
+	stOutData				:= stOut);
+	
+// Communication
+// =============
+fbCommunication(
+	bResetMaximumDemandCounter	:= , 
+	bResetOverflowCounter		:= , 
+	bResetInactiveProcessImage	:= , 
+	bResetDataFrameError		:= , 
+	dwOptions					:= , 
+	bBusy						=> , 
+	bError						=> , 
+	udiErrorId					=> , 
+	arrBufferDemandMeter		=> , 
+	arrBufferMaximumDemandMeter	=> , 
+	arrBufferOverflowCounter	=> , 
+	bLineIsInitialized			=> , 
+	b24VPowerSupplySwitchedOn	=> , 
+	bDigitalInput1Active		=> , 
+	bDigitalInput2Active		=> , 
+	bProcessImageInactive		=> , 
+	bDataFrameError				=> , 
+	bChecksumError				=> , 
+	stInData					:= stIn, 
+	stOutData					:= stOut, 
+	stCommandBuffer				:= stCommandBuffer);
+	
+// Send screen with address 8 down with middle priority
+// ====================================================
+fbDown(
+	bStart						:= , 
+	dwAddr						:= 8, 
+	eAddrType					:= E_SMIAddrType.eSMIAddrTypeAddress, 
+	dwAddrOption				:= , 
+	eCommandPriority			:= E_SMICommandPriority.eSMICommandPriorityMiddle, 
+	bBusy						=> , 
+	bError						=> , 
+	udiErrorId					=> , 
+	stCommandBuffer				:= stCommandBuffer);
+	
+// Send screen with address 10 up with high priority
+// =================================================
+fbUp(
+	bStart						:= , 
+	dwAddr						:= 10, 
+	eAddrType					:= E_SMIAddrType.eSMIAddrTypeAddress, 
+	dwAddrOption				:= , 
+	eCommandPriority			:= E_SMICommandPriority.eSMICommandPriorityHigh, 
+	bBusy						=> , 
+	bError						=> , 
+	udiErrorId					=> , 
+	stCommandBuffer				:= stCommandBuffer);
+	
+// Request diagnostics from all or a group of screens
+// ==================================================
+fbDiag(
+	bStart						:= , 		// The function block is started and the command is sent on applying a positive edge to this input.
+	dwAddr						:= , 		// Manufacturer code (0-15), address of a device (0-15), bit field (16 bits) for the group addressing or slave ID (32-bit key ID). This input has no meaning if a collective call (broadcast) is sent.
+	eAddrType					:= , 		// Defines whether the dwAddr input is to be evaluated as a manufacturer code, the address of a device or for group addressing. Addressing by slave Id (eAddrType = eSMIAddrTypeSlaveId) is not permitted.
+	dwAddrOption				:= , 		// Reserved for future expansions.
+	eCommandPriority			:= , 		// Priority (high, medium or low) with which the command is processed by the PLC library.
+	bBusy						=> , 
+	bError						=> , 
+	udiErrorId					=> , 
+	eResDrivesUp				=> , 
+	eResDrivesDown				=> , 
+	eResIsStopped				=> , 
+	eResWithError				=> , 
+	stCommandBuffer				:= stCommandBuffer);
+	
+(* Examples of the outputs of this diagnostic FB
+
+	All drives have stopped:
+	------------------------	
+	Outputs	Meaning
+		eResDrivesUp 	= eSMIDiagResNoMotorDrivesUp						No drive is driving up.
+		eResDrivesDown 	= eSMIDiagResNoMotorDrivesDown						No drive is driving down.
+		eResIsStopped 	= eSMIDiagResAtLeastOneMotorIsStopped				At least one drive has stopped.
+		eResWithError 	= eSMIDiagResNoMotorWithError						No drive has a motor error.
+
+	All drives are driving up:
+	--------------------------
+	Outputs	Meaning
+		eResDrivesUp 	= eSMIDiagResAtLeastOneMotorDrivesUp				At least one drive is driving up.
+		eResDrivesDown 	= eSMIDiagResNoMotorDrivesDown						No drive is driving down.
+		eResIsStopped 	= eSMIDiagResNoMotorIsStopped						No drive has stopped.
+		eResWithError 	= eSMIDiagResNoMotorWithError						No drive has a motor error.
+
+	One drive has stopped and one drive is driving up:
+	-------------------------------------------------
+	Outputs	Meaning
+		eResDrivesUp 	= eSMIDiagResAtLeastOneMotorDrivesUp				At least one drive is driving up.
+		eResDrivesDown 	= eSMIDiagResNoMotorDrivesDown						No drive is driving down.
+		eResIsStopped 	= eSMIDiagResAtLeastOneMotorIsStopped				At least one drive has stopped.
+		eResWithError 	= eSMIDiagResNoMotorWithError						No drive has a motor error.
+
+	One drive has stopped, one drive is driving up and one drive is driving down:
+	-----------------------------------------------------------------------------
+	Outputs	Meaning
+		eResDrivesUp 	= eSMIDiagResAtLeastOneMotorDrivesUp				At least one drive is driving up.
+		eResDrivesDown 	= eSMIDiagResAtLeastOneMotorDrivesDown				At least one drive is driving down.
+		eResIsStopped 	= eSMIDiagResAtLeastOneMotorIsStopped				At least one drive has stopped.
+		eResWithError 	= eSMIDiagResNoMotorWithError						No drive has a motor error.
+*)]]></ST>
+    </Implementation>
+    <LineIds Name="P_SMI">
+      <LineId Id="31" Count="1" />
+      <LineId Id="9" Count="16" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="38" Count="20" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="101" Count="1" />
+      <LineId Id="63" Count="8" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="103" Count="1" />
+      <LineId Id="75" Count="1" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="79" Count="4" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="107" Count="1" />
+      <LineId Id="110" Count="12" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="123" Count="1" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="127" Count="6" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="134" Count="6" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="141" Count="6" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="148" Count="6" />
+      <LineId Id="125" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

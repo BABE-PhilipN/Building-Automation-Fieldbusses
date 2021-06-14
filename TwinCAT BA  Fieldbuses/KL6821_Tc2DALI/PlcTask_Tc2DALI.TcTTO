@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <Task Name="PlcTask_Tc2DALI" Id="{0fd847fd-dbda-44f7-b5f5-f7c194df613b}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>10000</CycleTime>
+    <Priority>25</Priority>
+    <PouCall>
+      <Name>MAIN</Name>
+    </PouCall>
+    <TaskFBGuid>{f415eede-e569-46e7-a819-96cc8028f3be}</TaskFBGuid>
+    <Fb_init>{80536653-5a23-413e-8acf-9c3fd835539c}</Fb_init>
+    <Fb_exit>{a9646a5a-d696-48dc-8a9e-515b341806aa}</Fb_exit>
+    <CycleUpdate>{abbf4a82-ccdc-4464-b19d-2d411db8a57d}</CycleUpdate>
+    <PostCycleUpdate>{da62dd1e-4359-4495-9ebe-2935fd650465}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>

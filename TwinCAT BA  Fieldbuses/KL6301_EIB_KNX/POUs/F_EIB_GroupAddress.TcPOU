@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <POU Name="F_EIB_GroupAddress" Id="{2ad95bdb-b261-4b1c-88b7-e0922bcc3c36}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_EIB_GroupAddress : EIB_GROUP_ADDR
+VAR_INPUT
+	EIB_MAIN: BYTE;
+	EIB_SUB_MAIN: BYTE;
+	EIB_NUMBER: BYTE;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_EIB_GroupAddress.MAIN		:=	EIB_MAIN;
+F_EIB_GroupAddress.SUB_MAIN	:=	EIB_SUB_MAIN;
+F_EIB_GroupAddress.NUMBER	:=	EIB_NUMBER;
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_EIB_GroupAddress">
+      <LineId Id="7" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

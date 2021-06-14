@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <GVL Name="GVL_IO" Id="{c67eb45e-7210-4be8-8a76-68280d2b27e8}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+    stComIn    AT %I* : ST_KL6781inData22B;
+    stComOut   AT %Q* : ST_KL6781outData22B;
+    stCom             : ST_MBUS_Communication;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

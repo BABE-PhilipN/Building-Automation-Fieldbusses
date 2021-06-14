@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="P_BacnetRev14" Id="{c7abdda6-a191-4ea9-b004-a26b369093ae}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_BacnetRev14
+VAR
+	
+	fbBACnet_Adapter: FB_BACnet_Adapter;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//	=======================================================================================================================================================================
+// 	Steps to be executed in order for the program to work:
+//	=======================================================================================================================================================================
+//	Step 1: add the "Tc3_BACnetRev14" and "Tc3_BA2_Common" library
+//	Step 2: rebuild the PLC program and link the "Tc3_BACnetRev14.BACnet_Globals.DefaultAdapter.BACnet_AmsNetId" input variable to the "AmsNetId" in the BACnet I/O Device.
+//	Step 3: add a BACnet server object to the I/O Device.
+//			This is always adviced (even when you only need to read/write data from/to other devices), because otherwise this device isn't found with software like YABE.
+//			Otherwise there is no way to determine this device trigger BACnet communication.
+//	=======================================================================================================================================================================
+
+
+
+//	=======================================================================================================================================================================
+//	Retrieving the BACnet Adapter state
+//	=======================================================================================================================================================================
+
+// If the status of the BACnet Adapter (I/O Device) is used in the PLC program or visu, it can be retrieved with the FB_BACnet_Adapter
+// This FB has an integrated %I* input to link to the AmsNetId of the I/O device in order to retrieve the status from the correct adapter.
+// when this isn't linked, the default AmsNetId (Step 2 from above) will be taken.
+
+	fbBACnet_Adapter(
+		eAdapterStatus	=> , 
+		bEthernetLink	=> , 
+		bGateway		=> , 
+		sAmsNetId		=> , 
+		bFirstCycle		=> , 
+		eErrorID		=> );
+//	=======================================================================================================================================================================
+	
+
+//	=======================================================================================================================================================================
+//	Retrieving the BACnet Adapter state
+//	=======================================================================================================================================================================
+
+// By running this PLC program, the BACnet server will generate all the Nodes and Objects and have them accessible for all external BACnet devices
+// These Nodes and Objects do not have to in the hardware config and thus no activate configuration is needed to activate them.
+// 		If you start from scratch, you do need an activate configuration to activate the BACnet I/O Device and the BACnet Server Object.
+//		But for adding (or deleting) objects, a simple online change is sufficient.
+//		Do note that this program is made in such a way that only default values are set up in the declaration, so an online change might not be enough to modify 
+//			the settings made in the declaration part of the program.
+//	Even though these Nodes and Objects are not in the hardware config, they can be made visible, using the  "Scan" button in the "Dynamic Object Management" section
+//		on the "Object Settings" in the BACnet server object.
+// This scan is executed in this example, so the result of this coding can be seen in the Folder structure named "Building" in the BACnet Server Object 
+
+	P_BAcnetRev14_Local();
+//	=======================================================================================================================================================================
+]]></ST>
+    </Implementation>
+    <LineIds Name="P_BacnetRev14">
+      <LineId Id="39" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="32" Count="3" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="47" Count="2" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="18" Count="5" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="50" Count="2" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="60" Count="2" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
